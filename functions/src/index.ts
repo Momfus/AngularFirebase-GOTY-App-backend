@@ -49,5 +49,36 @@ app.get('/goty', async (req, res) => { // Deploy in firestore database
 
 });
 
+app.post('/goty/:id', async (req, res) => {
+
+  const id = req.params.id;
+  const gameRef = db.collection('goty').doc(id);
+  const gameSnap = await gameRef.get();
+
+  if( !gameSnap.exists ) {
+
+    res.status(404).json({
+      ok: false,
+      msg: `There isnt a game with that ID = ${id}`
+    });
+
+  } else {
+
+    const game = gameSnap.data() || { votes: 0};
+
+    gameRef.update({
+      votes: game.votes + 1
+    });
+
+    res.json({
+
+      ok: true,
+      msg: `Thanks to vote to ${ game.name }`
+      
+    });
+
+  }
+
+});
 
 export const api = functions.https.onRequest( app );
